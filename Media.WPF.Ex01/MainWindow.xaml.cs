@@ -33,9 +33,9 @@ namespace Media.WPF.Ex01
             _musicController.Player.IsFinished += SetMusicPlay;
 
             //listboxen opvullen
-            musicListBox.ItemsSource = _musicController.List;
-            movieListBox.ItemsSource = _movieController.List;
-            playlistListBox.ItemsSource = _musicController.PlayList.List;
+            musicTabItem.DataContext = _musicController.List;
+            movieTabItem.DataContext = _movieController.List;
+            playlistListBox.DataContext = _musicController.PlayList.List;
 
             //Playlist opvullen
             AddToPlaylistButton.Click += AddToPlaylistButton_Click;
@@ -85,9 +85,6 @@ namespace Media.WPF.Ex01
                 VolumeSlider.IsEnabled = false;
                 musicListBox.SelectedItem = null;
                 playlistListBox.SelectedItem = null;
-                SingerTextBox.Text = "";
-                MusicTitleTextBox.Text = "";
-                MusicFilePresentCheckBox.IsChecked = false;
                 _musicController.ClearSelected();
                 _newFile = null;
             }
@@ -96,9 +93,6 @@ namespace Media.WPF.Ex01
                 DeleteMovieButton.IsEnabled = false;
                 PlayMovieButton.IsEnabled = false;
                 movieListBox.SelectedItem = null;
-                DirectorTextBox.Text = "";
-                MovieTitleTextBox.Text = "";
-                MovieFilePresentCheckBox.IsChecked = false;
                 _movieController.ClearSelected();
                 _newFile = null;
             }
@@ -110,7 +104,7 @@ namespace Media.WPF.Ex01
             {
                 _activeController = _musicController;
             }
-            else if (moviesTabItem.IsSelected)
+            else if (movieTabItem.IsSelected)
             {
                 _activeController = _movieController;
             }
@@ -122,11 +116,13 @@ namespace Media.WPF.Ex01
             if (_activeController == _musicController && musicListBox.SelectedItem != null)
             {
                 playlistListBox.SelectedItem = null;
+                selectedSongDockPanel.DataContext = _musicController.List;
                 var song = (Song)musicListBox.SelectedItem;
                 if (song != null)
                 {
-                    SelectMusicItem(song);
+                    _musicController.ChangeSelected(song);
                     SetMusicForm();
+                    _newFile = null; // zorgt ervoor dat als song verandert, de added file niet gesavet wordt bij een andere song...
                 }
             }
             else if (_activeController == _movieController)
@@ -134,8 +130,9 @@ namespace Media.WPF.Ex01
                 var movie = (Movie)movieListBox.SelectedItem;
                 if (movie != null)
                 {
-                    SelectMovieItem(movie);
+                    _movieController.ChangeSelected(movie);
                     SetMovieForm();
+                    _newFile = null; //idem
                 }
             }
             e.Handled = true;
@@ -146,39 +143,15 @@ namespace Media.WPF.Ex01
             if(playlistListBox.SelectedItem != null)
             {
                 musicListBox.SelectedItem = null;
+                selectedSongDockPanel.DataContext = _musicController.PlayList.List;
                 var song = (Song)playlistListBox.SelectedItem;
                 if (song != null)
                 {
-                    SelectMusicItem(song);
+                    _musicController.ChangeSelected(song);
                     SetMusicForm();
                 }
             }
             e.Handled = true;
-        }
-
-        private void SelectMusicItem(Song song)
-        {
-            SingerTextBox.Text = song.Singer;
-            MusicTitleTextBox.Text = song.Title;
-            if (song.File != null)
-            {
-                MusicFilePresentCheckBox.IsChecked = true;
-            } else
-            {
-                MusicFilePresentCheckBox.IsChecked = false;
-            }
-            _musicController.ChangeSelected(song);
-        }
-
-        private void SelectMovieItem(Movie movie)
-        {
-            DirectorTextBox.Text = movie.Director;
-            MovieTitleTextBox.Text = movie.Title;
-            if (movie.File != null)
-            {
-                MovieFilePresentCheckBox.IsChecked = true;
-            }
-            _movieController.ChangeSelected(movie);
         }
 
         private void SetMusicForm()
@@ -228,12 +201,10 @@ namespace Media.WPF.Ex01
                 _newFile = file;
                 if (_activeController == _musicController)
                 {
-                    MusicFilePresentCheckBox.IsChecked = true;
                     SetMusicForm();
                 }
                 else if (_activeController == _movieController)
                 {
-                    MovieFilePresentCheckBox.IsChecked = true;
                     SetMovieForm();
                 }
             }
@@ -319,6 +290,8 @@ namespace Media.WPF.Ex01
         private void CancelButton_Click(object sender, RoutedEventArgs e)
         {
             ClearSelection();
+
+            // zorgen dat als er muziek aant afspelen is of muziek in de playlist zit, er rekening wordt gehouden met het clearen van die knoppen...
         }
 
         private void DeleteButton_Click(object sender, RoutedEventArgs e)
@@ -419,6 +392,8 @@ namespace Media.WPF.Ex01
             _musicController.StopPlaying();
             NowPlayingLabel.Content = "Now Playing: ";
             SetMusicPlay();
+
+            // zorgen dat als het muziek gepaused is, de Text van de Pauseknop terug op "Pause" komt te staan
         }
 
         private void NextMusicButton_Click(object sender, RoutedEventArgs e)
