@@ -22,7 +22,10 @@ namespace Media.Controller.Ex01
         /// A private variable that will hold the playlist that is currently in use.
         /// </summary>
         private IPlaylist _playlist;
-
+        /// <summary>
+        /// A private variable that will hold the playlist that is currently in use.
+        /// </summary>
+        private IMapper _musicMapper;
         /// <summary>
         /// Constructor that calls the base constructor and initializes the player and the playlist.
         /// </summary>

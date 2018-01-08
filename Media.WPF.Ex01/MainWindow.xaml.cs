@@ -122,7 +122,7 @@ namespace Media.WPF.Ex01
                 {
                     _musicController.ChangeSelected(song);
                     SetMusicForm();
-                    _newFile = null; // zorgt ervoor dat als song verandert, de added file niet gesavet wordt bij een andere song...
+                    _newFile = null; // zorgt ervoor dat als song verandert, de added file niet gesavet wordt bij een andere song
                 }
             }
             else if (_activeController == _movieController)
@@ -156,7 +156,7 @@ namespace Media.WPF.Ex01
 
         private void SetMusicForm()
         {
-            if (musicListBox.SelectedItem != null || playlistListBox.SelectedItem != null) //bestaande song aanpassen
+            if (musicListBox.SelectedItem != null || playlistListBox.SelectedItem != null)
             {
                 DeleteMusicButton.IsEnabled = true;
                 if (_musicController.Selected.File != null)
