@@ -23,10 +23,6 @@ namespace Media.Controller.Ex01
         /// </summary>
         private IPlaylist _playlist;
         /// <summary>
-        /// A private variable that will hold the playlist that is currently in use.
-        /// </summary>
-        private IMapper _musicMapper;
-        /// <summary>
         /// Constructor that calls the base constructor and initializes the player and the playlist.
         /// </summary>
         /// <param name="player">A player that you want to use and that is already initialized.</param>
@@ -100,24 +96,27 @@ namespace Media.Controller.Ex01
         /// </summary>
         protected override void InitializeData()
         {
-            List = new ObservableCollection<DataModel.Media>
-            {
-                new Song()
-                {
-                    Title = "Summer of 69",
-                    Singer = "Bryan Adams"
-                },
-                new Song()
-                {
-                    Title = "Title",
-                    Singer = "Singer"
-                },
-                new Song()
-                {
-                    Title = "Data Binding",
-                    Singer = "Test"
-                }
-            };
+            Mapper = new MusicMapper();
+            List = Mapper.GetAllMedia();
+
+            //List = new ObservableCollection<DataModel.Media>
+            //{
+            //    new Song()
+            //    {
+            //        Title = "Summer of 69",
+            //        Singer = "Bryan Adams"
+            //    },
+            //    new Song()
+            //    {
+            //        Title = "Title",
+            //        Singer = "Singer"
+            //    },
+            //    new Song()
+            //    {
+            //        Title = "Data Binding",
+            //        Singer = "Test"
+            //    }
+            //};
         }
 
         /// <summary>

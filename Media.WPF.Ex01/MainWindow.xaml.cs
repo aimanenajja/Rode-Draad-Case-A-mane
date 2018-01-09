@@ -117,7 +117,7 @@ namespace Media.WPF.Ex01
             {
                 playlistListBox.SelectedItem = null;
                 selectedSongDockPanel.DataContext = _musicController.List;
-                var song = (Song)musicListBox.SelectedItem;
+                Song song = (Song)musicListBox.SelectedItem;
                 if (song != null)
                 {
                     _musicController.ChangeSelected(song);
@@ -127,7 +127,7 @@ namespace Media.WPF.Ex01
             }
             else if (_activeController == _movieController)
             {
-                var movie = (Movie)movieListBox.SelectedItem;
+                Movie movie = (Movie)movieListBox.SelectedItem;
                 if (movie != null)
                 {
                     _movieController.ChangeSelected(movie);
@@ -144,17 +144,18 @@ namespace Media.WPF.Ex01
             {
                 musicListBox.SelectedItem = null;
                 selectedSongDockPanel.DataContext = _musicController.PlayList.List;
-                var song = (Song)playlistListBox.SelectedItem;
+                Song song = (Song)playlistListBox.SelectedItem;
                 if (song != null)
                 {
                     _musicController.ChangeSelected(song);
                     SetMusicForm();
+                    _newFile = null; //idem
                 }
             }
             e.Handled = true;
         }
 
-        private void SetMusicForm()
+        private void SetMusicForm() //proberen weg te krijgen dmv DataBinding
         {
             if (musicListBox.SelectedItem != null || playlistListBox.SelectedItem != null)
             {
@@ -170,7 +171,7 @@ namespace Media.WPF.Ex01
             }
         }
 
-        private void SetMovieForm()
+        private void SetMovieForm() //proberen weg te krijgen dmv DataBinding
         {
             if (movieListBox.SelectedItem != null)
             {
@@ -188,7 +189,7 @@ namespace Media.WPF.Ex01
 
         private void AddFileButton_Click(object sender, RoutedEventArgs e)
         {
-            var dialog = new OpenFileDialog
+            OpenFileDialog dialog = new OpenFileDialog
             {
                 Multiselect = false,
                 Title = "Add file to media",
@@ -197,7 +198,7 @@ namespace Media.WPF.Ex01
             dialog.ShowDialog();
             if (dialog.FileName != "")
             {
-                var file = LoadConvert.ImportFile(dialog.FileName);
+                byte[] file = LoadConvert.ImportFile(dialog.FileName);
                 _newFile = file;
                 if (_activeController == _musicController)
                 {
@@ -210,13 +211,13 @@ namespace Media.WPF.Ex01
             }
         }
         
-        private void SaveMusicButton_Click(object sender, RoutedEventArgs e)
+        private void SaveMusicButton_Click(object sender, RoutedEventArgs e) // wegschrijven
         {
             if (SingerTextBox.Text != "" && MusicTitleTextBox.Text != "")
             {
-                if (_musicController.Selected == null)
+                if (_musicController.Selected == null) // Create
                 {
-                    var newSong = new Song()
+                    Song newSong = new Song()
                     {
                         Singer = SingerTextBox.Text,
                         Title = MusicTitleTextBox.Text,
@@ -224,24 +225,24 @@ namespace Media.WPF.Ex01
                     };
                     _musicController.AddMedia(newSong);
                 }
-                else
+                else // Update
                 {
-                    var selectedSong = (Song)_musicController.Selected;
-                    selectedSong.Singer = SingerTextBox.Text;
-                    selectedSong.Title = MusicTitleTextBox.Text;
-                    if (selectedSong.File == null)
+                    Song oldSong = (Song)_musicController.Selected;
+                    oldSong.Singer = SingerTextBox.Text;
+                    oldSong.Title = MusicTitleTextBox.Text;
+                    if (oldSong.File == null)
                     {
-                        selectedSong.File = _newFile;
-                    } else if (selectedSong.File != _newFile && _newFile != null)
+                        oldSong.File = _newFile;
+                    } else if (oldSong.File != _newFile && _newFile != null)
                     {
-                        selectedSong.File = _newFile;
+                        oldSong.File = _newFile;
                     }
-                    _musicController.ChangeSelected(_musicController.Selected);
+                    _musicController.ChangeSelected(oldSong);
                     musicListBox.Items.Refresh();
                     playlistListBox.Items.Refresh();
                 }
                 ClearSelection();
-                SetMusicPlay();
+                //SetMusicPlay();
             }
             else
             {
@@ -255,7 +256,7 @@ namespace Media.WPF.Ex01
             {
                 if (_movieController.Selected == null)
                 {
-                    var newMovie = new Movie()
+                    Movie newMovie = new Movie()
                     {
                         Director = DirectorTextBox.Text,
                         Title = MovieTitleTextBox.Text,
@@ -265,7 +266,7 @@ namespace Media.WPF.Ex01
                 }
                 else
                 {
-                    var selectedMovie = (Movie)_movieController.Selected;
+                    Movie selectedMovie = (Movie)_movieController.Selected;
                     selectedMovie.Director = DirectorTextBox.Text;
                     selectedMovie.Title = MovieTitleTextBox.Text;
                     if (selectedMovie.File == null)
@@ -291,17 +292,18 @@ namespace Media.WPF.Ex01
         {
             ClearSelection();
 
-            // zorgen dat als er muziek aant afspelen is of muziek in de playlist zit, er rekening wordt gehouden met het clearen van die knoppen...
+            // zorgen dat als er muziek aant afspelen is of muziek in de playlist zit,
+            // er rekening wordt gehouden met het clearen van die knoppen...
         }
 
-        private void DeleteButton_Click(object sender, RoutedEventArgs e)
+        private void DeleteButton_Click(object sender, RoutedEventArgs e) // Delete
         {
             if (_activeController == _musicController)
             {
                 if (musicListBox.SelectedItem != null)
                 {
-                    var song = (Song)musicListBox.SelectedItem;
-                    _musicController.List.Remove(song);
+                    Song song = (Song)musicListBox.SelectedItem;
+                    _musicController.RemoveMedia(song);
                     ClearSelection();
                 }
             }
@@ -309,8 +311,8 @@ namespace Media.WPF.Ex01
             {
                 if (movieListBox.SelectedItem != null)
                 {
-                    var movie = (Movie)movieListBox.SelectedItem;
-                    _movieController.List.Remove(movie);
+                    Movie movie = (Movie)movieListBox.SelectedItem;
+                    _movieController.RemoveMedia(movie);
                     ClearSelection();
                 }
             }
@@ -367,7 +369,7 @@ namespace Media.WPF.Ex01
 
         private void PlayMusicButton_Click(object sender, RoutedEventArgs e)
         {
-            var song = _musicController.PlayFromPlaylist();
+            Song song = _musicController.PlayFromPlaylist();
             NowPlayingLabel.Content = "Now Playing: " + song.Singer + " - " + song.Title;
             SetMusicPlay();
         }

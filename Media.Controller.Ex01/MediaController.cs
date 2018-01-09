@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using Media.DataModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,6 +13,10 @@ namespace Media.Controller.Ex01
     /// </summary>
     public abstract class MediaController : IDisposable
     {
+        /// <summary>
+        /// A Mapper that's responsible for retrieving files from the database.
+        /// </summary>
+        public IMapper Mapper;
         /// <summary>
         /// A list where media items are stored.
         /// </summary>
@@ -49,7 +54,7 @@ namespace Media.Controller.Ex01
         /// <param name="newSelected">An item from the list of media items you want to set as selected.</param>
         public void ChangeSelected(DataModel.Media newSelected)
         {
-            if (List.Contains(newSelected))
+            if (Mapper.UpdateMedia(newSelected))
             {
                 Selected = newSelected;
             }
@@ -61,8 +66,7 @@ namespace Media.Controller.Ex01
         /// <param name="newMedia">A new media item that you want to add to the list of media items.</param>
         public void AddMedia(DataModel.Media newMedia)
         {
-            ClearSelected();
-            List.Add(newMedia);
+            List.Add(Mapper.AddMedia(newMedia));
         }
 
         /// <summary>
@@ -71,8 +75,10 @@ namespace Media.Controller.Ex01
         /// <param name="oldMedia">An item form the list of media items you want to delete.</param>
         public void RemoveMedia(DataModel.Media oldMedia)
         {
-            ClearSelected();
-            List.Remove(oldMedia);
+            if (Mapper.DeleteMedia(oldMedia))
+            {
+                List.Remove(oldMedia);
+            }
         }
 
         /// <summary>

@@ -6,13 +6,13 @@ using System.Text;
 using System.Threading.Tasks;
 using Media.DataModel;
 
-namespace Media.Mapper
+namespace Media.DataModel
 {
     public interface IMapper
     {
         ObservableCollection<DataModel.Media> GetAllMedia();
         byte[] GetMediaFile(int id);
-        void AddMedia(DataModel.Media newMedia);
+        DataModel.Media AddMedia(DataModel.Media newMedia);
         bool UpdateMedia(DataModel.Media updateMedia);
         bool DeleteMedia(DataModel.Media oldMedia); 
     }

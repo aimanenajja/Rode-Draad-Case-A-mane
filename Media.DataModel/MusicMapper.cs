@@ -8,21 +8,22 @@ using System.Threading.Tasks;
 using Media.DataModel;
 using Media.DataModel.Exceptions;
 
-namespace Media.Mapper
+namespace Media.DataModel
 {
     public class MusicMapper : IMapper
     {
-        SqlConnection cn = MediaDB.GetConnection();
+        SqlConnection cn;
 
-        ObservableCollection<DataModel.Media> IMapper.GetAllMedia()
+        public ObservableCollection<DataModel.Media> GetAllMedia()
         {
             ObservableCollection<DataModel.Media> songs = new ObservableCollection<DataModel.Media>();
             string SqlStatement = "SELECT Id, Title, Singer FROM Song";
             try {
-                using (SqlConnection conn = cn)
+                using (SqlConnection cn = MediaDB.GetConnection())
                 {
-                    using (SqlCommand cmd = new SqlCommand(SqlStatement, conn))
+                    using (SqlCommand cmd = new SqlCommand(SqlStatement, cn))
                     {
+                        cn.Open();
                         using (SqlDataReader dr = cmd.ExecuteReader())
                         {
                             int idPos = dr.GetOrdinal("Id");
@@ -57,12 +58,12 @@ namespace Media.Mapper
             string SqlStatement  = "SELECT File FROM Song WHERE Id = @songId";
             try
             {
-                using (SqlConnection conn = cn)
+                using (SqlConnection cn = MediaDB.GetConnection())
                 {
-                    using (SqlCommand cmd = new SqlCommand(SqlStatement, conn))
+                    using (SqlCommand cmd = new SqlCommand(SqlStatement, cn))
                     {
                         cmd.Parameters.AddWithValue("@songId", songId);
-                        conn.Open();
+                        cn.Open();
                         musicFile = (byte []) cmd.ExecuteScalar();
                     }
                 }
@@ -86,17 +87,18 @@ namespace Media.Mapper
             }
             else
             {
-                addQuery = "INSERT INTO Song (Title, Singer, File) VALUES ('" + newMedia.Title + "', '" + ((Song)newMedia).Singer + "', '" + newMedia.File + "');"
+                addQuery = "INSERT INTO Song (Title, Singer, File) VALUES ('" + newMedia.Title + "', '" + ((Song)newMedia).Singer + "', '"
+                    + "0x" + BitConverter.ToString(newMedia.File).Replace("-", "") + "');"
                     + " SELECT CAST(scope_identity() AS int);";
             }
 
             try
             {
-                using (SqlConnection conn = cn)
+                using (SqlConnection cn = MediaDB.GetConnection())
                 {
-                    using (SqlCommand cmd = new SqlCommand(addQuery, conn))
+                    using (SqlCommand cmd = new SqlCommand(addQuery, cn))
                     {
-                        conn.Open();
+                        cn.Open();
                         newMedia.Id = (int)cmd.ExecuteScalar();
                     }
                 }
@@ -119,17 +121,18 @@ namespace Media.Mapper
             }
             else
             {
-                updateQuery = "UPDATE Song SET Title = '" + updateMedia.Title + "', Singer = '" + ((Song)updateMedia).Singer + "', File = '" + updateMedia.File 
+                updateQuery = "UPDATE Song SET Title = '" + updateMedia.Title + "', Singer = '" + ((Song)updateMedia).Singer + "', File = '" 
+                    + "0x" + BitConverter.ToString(updateMedia.File).Replace("-", "")  
                     + "' WHERE Id = " + updateMedia.Id;
             }
 
             try
             {
-                using (SqlConnection conn = cn)
+                using (SqlConnection cn = MediaDB.GetConnection())
                 {
-                    using (SqlCommand cmd = new SqlCommand(updateQuery, conn))
+                    using (SqlCommand cmd = new SqlCommand(updateQuery, cn))
                     {
-                        conn.Open();
+                        cn.Open();
                         updateCount = cmd.ExecuteNonQuery();
                     }
 
@@ -149,11 +152,11 @@ namespace Media.Mapper
 
             try
             { 
-                using (SqlConnection conn = cn)
+                using (SqlConnection cn = MediaDB.GetConnection())
                 {
-                    using (SqlCommand cmd = new SqlCommand(deleteQuery, conn))
+                    using (SqlCommand cmd = new SqlCommand(deleteQuery, cn))
                     {
-                        conn.Open();
+                        cn.Open();
                         deleteCount = cmd.ExecuteNonQuery();
                     }
                 }

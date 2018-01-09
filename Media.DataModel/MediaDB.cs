@@ -13,7 +13,7 @@ namespace Media.DataModel
         public static SqlConnection GetConnection()
         {
             string cs =
-                ConfigurationManager.ConnectionStrings["MusicStoreConnectionString"].ConnectionString;
+                ConfigurationManager.ConnectionStrings["MediaDBConnectionString"].ConnectionString;
             SqlConnection cn = new SqlConnection(cs);
             return cn;
         }
